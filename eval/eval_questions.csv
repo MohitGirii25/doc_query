@@ -1,0 +1,11 @@
+question,expected_source
+How many days of sick leave do employees get?,leave_policy.txt
+How far in advance should vacation requests be submitted?,leave_policy.txt
+Can unused vacation days be carried forward?,leave_policy.txt
+How many days a week do employees work from the office?,remote_work.txt
+What are the core hours when working from home?,remote_work.txt
+What is required to protect data during remote work?,remote_work.txt
+How many approvals does a pull request need before merging?,code_review_guide.md
+How quickly should code reviews be completed?,code_review_guide.md
+How long is the probation period?,faq.csv#row1
+How do I reset my password?,faq.csv#row3

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DocuQuery Dashboard</title>
+  <style>
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 46rem; margin: 0 auto; padding: 1rem; color: #1a1a1a; background: #fff; }
+    .skip { position: absolute; left: -999px; } .skip:focus { left: 1rem; top: 1rem; background: #fff; padding: .5rem; }
+    label { display: block; font-weight: 600; margin-bottom: .25rem; }
+    input, button { font-size: 1rem; padding: .5rem .75rem; }
+    input { width: 100%; box-sizing: border-box; border: 2px solid #444; }
+    button { background: #0b57d0; color: #fff; border: 2px solid #0b57d0; cursor: pointer; margin-top: .5rem; }
+    :focus-visible { outline: 3px solid #b45f06; outline-offset: 2px; }
+    table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #444; padding: .4rem .6rem; text-align: left; }
+    #answer { margin-top: 1rem; padding: .75rem; border-left: 4px solid #0b57d0; background: #f1f5fd; min-height: 1.5rem; }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to main content</a>
+  <header><h1>DocuQuery</h1><p>Ask questions about the company documents.</p></header>
+  <main id="main">
+    <section aria-labelledby="ask-heading">
+      <h2 id="ask-heading">Ask a question</h2>
+      <label for="question">Your question (maximum 500 characters)</label>
+      <input id="question" name="question" type="text" maxlength="500" autocomplete="off">
+      <button id="ask-btn" type="button">Ask</button>
+      <div id="answer" role="status" aria-live="polite" tabindex="-1"></div>
+    </section>
+    <section aria-labelledby="metrics-heading">
+      <h2 id="metrics-heading">Service metrics</h2>
+      <table>
+        <caption>Live request metrics</caption>
+        <thead><tr><th scope="col">Metric</th><th scope="col">Value</th></tr></thead>
+        <tbody id="metrics-body"></tbody>
+      </table>
+      <button id="refresh-btn" type="button">Refresh metrics</button>
+    </section>
+  </main>
+  <script>
+    const answerBox = document.getElementById("answer");
+    async function loadMetrics() {
+      const m = await (await fetch("/metrics")).json();
+      const rows = [["Total requests", m.requests], ["Errors", m.errors],
+                    ["Average latency (ms)", m.avg_latency_ms], ["Pending reviews", m.pending_reviews]];
+      document.getElementById("metrics-body").innerHTML =
+        rows.map(([k, v]) => `<tr><th scope="row">${k}</th><td>${v}</td></tr>`).join("");
+    }
+    async function ask() {
+      const q = document.getElementById("question").value.trim();
+      if (!q) { answerBox.textContent = "Please enter a question."; return; }
+      answerBox.textContent = "Searching...";
+      try {
+        const resp = await fetch("/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: q }) });
+        const data = await resp.json();
+        answerBox.textContent = data.answer ? data.answer : (data.message || data.error);
+      } catch (e) { answerBox.textContent = "The service is unavailable. Please try again."; }
+      loadMetrics();
+    }
+    document.getElementById("ask-btn").addEventListener("click", ask);
+    document.getElementById("question").addEventListener("keydown", e => { if (e.key === "Enter") ask(); });
+    document.getElementById("refresh-btn").addEventListener("click", loadMetrics);
+    loadMetrics();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+# Code Review Guide
+Every pull request needs at least one approval from a teammate before merging. Reviewers check correctness, readability, test coverage and security. Pull requests should be small and focused, ideally under 400 lines of change. Authors must write unit tests for new features and run the full test suite before requesting a review. Reviews should be completed within one working day. Use clear, polite comments and suggest fixes instead of only pointing out problems.
